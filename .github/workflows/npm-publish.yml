@@ -57,6 +57,11 @@ jobs:
       - name: Tag NPM version
         run: npm version --allow-same-version ${{ github.event.release.tag_name }}
 
+      - name: Force an unpublish for same version of package
+        run: npm unpublish --force ${{ github.event.release.tag_name }}
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
       - name: Publish to NPM Registry
         run: npm publish
         env:
