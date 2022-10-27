@@ -64,8 +64,6 @@ jobs:
         run: |
           cp -f package.json ./dist
           cd ./dist
-
-      - name: Publish to NPM Registry
-        run: npm publish --userconfig .npmrc --registry https://registry.npmjs.org/
+          npm publish --userconfig .npmrc --registry https://registry.npmjs.org/
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
