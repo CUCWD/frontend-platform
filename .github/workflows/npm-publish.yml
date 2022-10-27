@@ -60,6 +60,6 @@ jobs:
         run: npm version --allow-same-version ${{ github.event.release.tag_name }}
 
       - name: Publish to NPM Registry
-        run: npm publish --registry https://registry.npmjs.org/
+        run: npm publish --userconfig .npmrc --registry https://registry.npmjs.org/
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
