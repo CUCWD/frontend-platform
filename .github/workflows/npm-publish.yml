@@ -62,7 +62,7 @@ jobs:
       # https://stackoverflow.com/questions/38935176/how-to-npm-publish-specific-folder-but-as-package-root
       - name: Copy `package.json` into `./dist` directory then cd into that folder before publishing to npmjs.
         run: |
-          cd package.json ./dist
+          cp -f package.json ./dist
           cd ./dist
 
       - name: Publish to NPM Registry
