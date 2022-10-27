@@ -59,6 +59,10 @@ jobs:
       - name: Tag NPM version
         run: npm version --allow-same-version ${{ github.event.release.tag_name }}
 
+      # https://stackoverflow.com/questions/38935176/how-to-npm-publish-specific-folder-but-as-package-root
+      - name: Copy `package.json` into `./dist` directory then cd into that folder before publishing to npmjs.
+        run: cd package.json ./dist && cd ./dist
+
       - name: Publish to NPM Registry
         run: npm publish --userconfig .npmrc --registry https://registry.npmjs.org/
         env:
