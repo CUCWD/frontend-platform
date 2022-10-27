@@ -1,6 +1,5 @@
 {
   "name": "@cucwd-prod/frontend-platform",
-  "version": "1.14.3-cucwd",
   "description": "Foundational application framework for Open edX micro-frontend applications.",
   "main": "index.js",
   "publishConfig": {
