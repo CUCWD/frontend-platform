@@ -1,5 +1,5 @@
 {
-  "name": "@edx/frontend-platform",
+  "name": "@cucwd/frontend-platform",
   "version": "1.0.0-semantically-released",
   "description": "Foundational application framework for Open edX micro-frontend applications.",
   "main": "index.js",
@@ -22,14 +22,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/edx/frontend-platform.git"
+    "url": "git+https://github.com/CUCWD/frontend-platform.git"
   },
-  "author": "edX",
+  "author": "edX, CUCWD",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/edx/frontend-platform/issues"
+    "url": "https://github.com/CUCWD/frontend-platform/issues"
   },
-  "homepage": "https://github.com/edx/frontend-platform#readme",
+  "homepage": "https://github.com/CUCWD/frontend-platform#readme",
   "devDependencies": {
     "@edx/brand": "npm:@edx/brand-openedx@1.1.0",
     "@edx/frontend-build": "9.0.0",
