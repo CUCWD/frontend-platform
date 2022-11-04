@@ -72,13 +72,13 @@ import { configure as configureI18n } from './i18n';
 import {
   APP_PUBSUB_INITIALIZED,
   APP_CONFIG_INITIALIZED,
+  APP_CONFIG_INITIALIZED_RUNTIME,
   APP_AUTH_INITIALIZED,
   APP_I18N_INITIALIZED,
   APP_LOGGING_INITIALIZED,
   APP_ANALYTICS_INITIALIZED,
   APP_READY, APP_INIT_ERROR,
 } from './constants';
-import configureCache from './auth/LocalForageCache';
 
 /**
  * A browser history or memory history object created by the [history](https://github.com/ReactTraining/history)
@@ -142,13 +142,12 @@ export async function runtimeConfig() {
 
     if (MFE_CONFIG_API_URL) {
       const apiConfig = { headers: { accept: 'application/json' } };
-      const apiService = await configureCache();
 
       const params = new URLSearchParams();
       params.append('mfe', APP_ID);
       const url = `${MFE_CONFIG_API_URL}?${params.toString()}`;
 
-      const { data } = await apiService.get(url, apiConfig);
+      const { data } = await getAuthenticatedHttpClient().get(url, apiConfig);
       mergeConfig(data);
     }
   } catch (error) {
@@ -251,7 +250,6 @@ export async function initialize({
 
     // Configuration
     await handlers.config();
-    await runtimeConfig();
     publish(APP_CONFIG_INITIALIZED);
 
     // Logging
@@ -286,6 +284,11 @@ export async function initialize({
     });
     await handlers.i18n();
     publish(APP_I18N_INITIALIZED);
+
+    // Runtime MFE Configuration
+    // Need to do this after Authentication Service setup.
+    await runtimeConfig();
+    publish(APP_CONFIG_INITIALIZED_RUNTIME);
 
     // Application Ready
     await handlers.ready();
