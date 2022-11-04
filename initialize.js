@@ -62,8 +62,7 @@ import { configure as configureLogging, getLoggingService, NewRelicLoggingServic
 import { configure as configureAnalytics, SegmentAnalyticsService, identifyAnonymousUser, identifyAuthenticatedUser } from './analytics';
 import { getAuthenticatedHttpClient, configure as configureAuth, ensureAuthenticatedUser, fetchAuthenticatedUser, hydrateAuthenticatedUser, getAuthenticatedUser, AxiosJwtAuthService } from './auth';
 import { configure as configureI18n } from './i18n';
-import { APP_PUBSUB_INITIALIZED, APP_CONFIG_INITIALIZED, APP_AUTH_INITIALIZED, APP_I18N_INITIALIZED, APP_LOGGING_INITIALIZED, APP_ANALYTICS_INITIALIZED, APP_READY, APP_INIT_ERROR } from './constants';
-import configureCache from './auth/LocalForageCache';
+import { APP_PUBSUB_INITIALIZED, APP_CONFIG_INITIALIZED, APP_CONFIG_INITIALIZED_RUNTIME, APP_AUTH_INITIALIZED, APP_I18N_INITIALIZED, APP_LOGGING_INITIALIZED, APP_ANALYTICS_INITIALIZED, APP_READY, APP_INIT_ERROR } from './constants';
 /**
  * A browser history or memory history object created by the [history](https://github.com/ReactTraining/history)
  * package.  Applications are encouraged to use this history object, rather than creating their own,
@@ -181,7 +180,7 @@ export function runtimeConfig() {
 
 function _runtimeConfig() {
   _runtimeConfig = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
-    var _getConfig, MFE_CONFIG_API_URL, APP_ID, apiConfig, apiService, params, url, _yield$apiService$get, data;
+    var _getConfig, MFE_CONFIG_API_URL, APP_ID, apiConfig, params, url, _yield$getAuthenticat, data;
 
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -191,7 +190,7 @@ function _runtimeConfig() {
             _getConfig = getConfig(), MFE_CONFIG_API_URL = _getConfig.MFE_CONFIG_API_URL, APP_ID = _getConfig.APP_ID;
 
             if (!MFE_CONFIG_API_URL) {
-              _context4.next = 15;
+              _context4.next = 12;
               break;
             }
 
@@ -200,38 +199,33 @@ function _runtimeConfig() {
                 accept: 'application/json'
               }
             };
-            _context4.next = 6;
-            return configureCache();
-
-          case 6:
-            apiService = _context4.sent;
             params = new URLSearchParams();
             params.append('mfe', APP_ID);
             url = "".concat(MFE_CONFIG_API_URL, "?").concat(params.toString());
-            _context4.next = 12;
-            return apiService.get(url, apiConfig);
+            _context4.next = 9;
+            return getAuthenticatedHttpClient().get(url, apiConfig);
 
-          case 12:
-            _yield$apiService$get = _context4.sent;
-            data = _yield$apiService$get.data;
+          case 9:
+            _yield$getAuthenticat = _context4.sent;
+            data = _yield$getAuthenticat.data;
             mergeConfig(data);
 
-          case 15:
-            _context4.next = 20;
+          case 12:
+            _context4.next = 17;
             break;
 
-          case 17:
-            _context4.prev = 17;
+          case 14:
+            _context4.prev = 14;
             _context4.t0 = _context4["catch"](0);
             // eslint-disable-next-line no-console
             console.error('Error with config API', _context4.t0.message);
 
-          case 20:
+          case 17:
           case "end":
             return _context4.stop();
         }
       }
-    }, _callee4, null, [[0, 17]]);
+    }, _callee4, null, [[0, 14]]);
   }));
   return _runtimeConfig.apply(this, arguments);
 }
@@ -374,29 +368,25 @@ function _initialize() {
             return handlers.config();
 
           case 8:
-            _context6.next = 10;
-            return runtimeConfig();
-
-          case 10:
             publish(APP_CONFIG_INITIALIZED); // Logging
 
             configureLogging(loggingService, {
               config: getConfig()
             });
-            _context6.next = 14;
+            _context6.next = 12;
             return handlers.logging();
 
-          case 14:
+          case 12:
             publish(APP_LOGGING_INITIALIZED); // Authentication
 
             configureAuth(authService, {
               loggingService: getLoggingService(),
               config: getConfig()
             });
-            _context6.next = 18;
+            _context6.next = 16;
             return handlers.auth(requireUser, hydrateUser);
 
-          case 18:
+          case 16:
             publish(APP_AUTH_INITIALIZED); // Analytics
 
             configureAnalytics(analyticsService, {
@@ -404,10 +394,10 @@ function _initialize() {
               loggingService: getLoggingService(),
               httpClient: getAuthenticatedHttpClient()
             });
-            _context6.next = 22;
+            _context6.next = 20;
             return handlers.analytics();
 
-          case 22:
+          case 20:
             publish(APP_ANALYTICS_INITIALIZED); // Internationalization
 
             configureI18n({
@@ -415,41 +405,48 @@ function _initialize() {
               config: getConfig(),
               loggingService: getLoggingService()
             });
-            _context6.next = 26;
+            _context6.next = 24;
             return handlers.i18n();
 
-          case 26:
-            publish(APP_I18N_INITIALIZED); // Application Ready
+          case 24:
+            publish(APP_I18N_INITIALIZED); // Runtime MFE Configuration
+            // Need to do this after Authentication Service setup.
 
-            _context6.next = 29;
+            _context6.next = 27;
+            return runtimeConfig();
+
+          case 27:
+            publish(APP_CONFIG_INITIALIZED_RUNTIME); // Application Ready
+
+            _context6.next = 30;
             return handlers.ready();
 
-          case 29:
+          case 30:
             publish(APP_READY);
-            _context6.next = 38;
+            _context6.next = 39;
             break;
 
-          case 32:
-            _context6.prev = 32;
+          case 33:
+            _context6.prev = 33;
             _context6.t0 = _context6["catch"](2);
 
             if (_context6.t0.isRedirecting) {
-              _context6.next = 38;
+              _context6.next = 39;
               break;
             }
 
-            _context6.next = 37;
+            _context6.next = 38;
             return handlers.initError(_context6.t0);
 
-          case 37:
+          case 38:
             publish(APP_INIT_ERROR, _context6.t0);
 
-          case 38:
+          case 39:
           case "end":
             return _context6.stop();
         }
       }
-    }, _callee6, null, [[2, 32]]);
+    }, _callee6, null, [[2, 33]]);
   }));
   return _initialize.apply(this, arguments);
 }

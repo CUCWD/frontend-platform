@@ -10,6 +10,14 @@ export var APP_PUBSUB_INITIALIZED = "".concat(APP_TOPIC, ".PUBSUB_INITIALIZED");
 
 export var APP_CONFIG_INITIALIZED = "".concat(APP_TOPIC, ".CONFIG_INITIALIZED");
 /**
+ * Event published when the application initialization runtime sequence has finished loading any dynamic
+ * configuration setup in a custom config handler.
+ *
+ * @event
+ */
+
+export var APP_CONFIG_INITIALIZED_RUNTIME = "".concat(APP_TOPIC, ".CONFIG_INITIALIZED_RUNTIME");
+/**
  * Event published when the application initialization sequence has finished determining the user's
  * authentication state, creating an authenticated API client, and executing auth handlers.
  *
