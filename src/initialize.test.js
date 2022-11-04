@@ -1,3 +1,4 @@
+import MockAdapter from 'axios-mock-adapter';
 import PubSub from 'pubsub-js';
 import {
   APP_PUBSUB_INITIALIZED,
@@ -30,7 +31,6 @@ import {
 import { configure as configureAnalytics, SegmentAnalyticsService } from './analytics';
 import { configure as configureI18n } from './i18n';
 import { getConfig } from './config';
-import configureCache from './auth/LocalForageCache';
 
 jest.mock('./logging');
 jest.mock('./auth');
@@ -38,6 +38,7 @@ jest.mock('./analytics');
 jest.mock('./i18n');
 jest.mock('./auth/LocalForageCache');
 
+let axiosMock;
 let config = null;
 const newConfig = {
   common: {
@@ -281,18 +282,26 @@ describe('initialize', () => {
   it('should initialize the app with runtime configuration', async () => {
     config.MFE_CONFIG_API_URL = 'http://localhost:18000/api/mfe/v1/config';
     config.APP_ID = 'auth';
-    configureCache.mockReturnValueOnce(Promise.resolve({
-      get: (url) => {
-        const params = new URL(url).search;
-        const mfe = new URLSearchParams(params).get('mfe');
-        return ({ data: { ...newConfig.common, ...newConfig[mfe] } });
+    // getAuthenticatedHttpClient.mockReturnValueOnce(Promise.resolve({
+    //   get: (url) => {
+    //     const params = new URL(url).search;
+    //     const mfe = new URLSearchParams(params).get('mfe');
+    //     return ({ data: { ...newConfig.common, ...newConfig[mfe] } });
+    //   },
+    // }));
+    axiosMock = new MockAdapter(getAuthenticatedHttpClient());
+    const params = new URL(config.MFE_CONFIG_API_URL).search;
+    const mfe = new URLSearchParams(params).get('mfe');
+    axiosMock.onGet(config.MFE_CONFIG_API_URL).reply(200, {
+      data: {
+        ...newConfig.common,
+        ...newConfig[mfe],
       },
-    }));
+    });
 
     const messages = { i_am: 'a message' };
     await initialize({ messages });
 
-    expect(configureCache).toHaveBeenCalled();
     expect(configureLogging).toHaveBeenCalledWith(NewRelicLoggingService, { config });
     expect(configureAuth).toHaveBeenCalledWith(AxiosJwtAuthService, {
       loggingService: getLoggingService(),
@@ -309,6 +318,7 @@ describe('initialize', () => {
       config,
       loggingService: getLoggingService(),
     });
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
 
     expect(fetchAuthenticatedUser).toHaveBeenCalled();
     expect(ensureAuthenticatedUser).not.toHaveBeenCalled();
@@ -323,16 +333,16 @@ describe('initialize', () => {
     config.MFE_CONFIG_API_URL = 'http://localhost:18000/api/mfe/v1/config';
     // eslint-disable-next-line no-console
     console.error = jest.fn();
-    configureCache.mockReturnValueOnce(Promise.reject(new Error('Api fails')));
+
+    // getAuthenticatedHttpClient.mockReturnValueOnce(Promise.reject(new Error('Api fails')));
+    axiosMock = new MockAdapter(getAuthenticatedHttpClient());
+    axiosMock.onGet(config.MFE_CONFIG_API_URL).reply(404, new Error('Api fails'));
 
     const messages = { i_am: 'a message' };
     await initialize({
       messages,
     });
 
-    expect(configureCache).toHaveBeenCalled();
-    // eslint-disable-next-line no-console
-    expect(console.error).toHaveBeenCalledWith('Error with config API', 'Api fails');
     expect(configureLogging).toHaveBeenCalledWith(NewRelicLoggingService, { config });
     expect(configureAuth).toHaveBeenCalledWith(AxiosJwtAuthService, {
       loggingService: getLoggingService(),
@@ -349,6 +359,10 @@ describe('initialize', () => {
       config,
       loggingService: getLoggingService(),
     });
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    // eslint-disable-next-line no-console
+    expect(console.error).toHaveBeenCalledWith('Error with config API', 'Api fails');
+
     expect(fetchAuthenticatedUser).toHaveBeenCalled();
     expect(ensureAuthenticatedUser).not.toHaveBeenCalled();
     expect(hydrateAuthenticatedUser).not.toHaveBeenCalled();
