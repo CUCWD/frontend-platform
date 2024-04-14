@@ -1,4 +1,5 @@
 import PubSub from 'pubsub-js';
+import { createBrowserHistory } from 'history';
 import {
   APP_PUBSUB_INITIALIZED,
   APP_CONFIG_INITIALIZED,
@@ -37,6 +38,7 @@ jest.mock('./auth');
 jest.mock('./analytics');
 jest.mock('./i18n');
 jest.mock('./auth/LocalForageCache');
+jest.mock('history');
 
 let config = null;
 // const newConfig = {
@@ -354,4 +356,13 @@ describe('initialize', () => {
   //   expect(hydrateAuthenticatedUser).not.toHaveBeenCalled();
   //   expect(logError).not.toHaveBeenCalled();
   // });
+});
+
+describe('history', () => {
+  it('browser history called by default path', async () => {
+    // import history from initialize;
+    expect(createBrowserHistory).toHaveBeenCalledWith({
+      basename: '/',
+    });
+  });
 });
