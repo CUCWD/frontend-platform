@@ -55,6 +55,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
  * @module Initialization
  */
 import { createBrowserHistory, createMemoryHistory } from 'history';
+import { getPath } from './utils';
 import { publish } from './pubSub'; // eslint-disable-next-line import/no-cycle
 
 import { getConfig, mergeConfig } from './config';
@@ -72,7 +73,7 @@ import { APP_PUBSUB_INITIALIZED, APP_CONFIG_INITIALIZED, APP_CONFIG_INITIALIZED_
  */
 
 export var history = typeof window !== 'undefined' ? createBrowserHistory({
-  basename: getConfig().PUBLIC_PATH
+  basename: getPath(getConfig().PUBLIC_PATH)
 }) : createMemoryHistory();
 /**
  * The default handler for the initialization lifecycle's `initError` phase.  Logs the error to the
